@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Task Manager</h1>
+    <form id="task-form" method="post">
+        {% csrf_token %}
+        <input type="text" id="detail-input" name="detail" placeholder="Task detail" required>
+        <input type="text" id="category-input" name="category" placeholder="Category" required>
+        <button type="submit" id="add-task-btn">Add Task</button>
+    </form>
+    <table id="task-table">
+        <thead>
+            <tr>
+                <th>discription</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for task in task_list %}
+            <tr id="task-{{ task.id }}">
+                <td>{{ task.discription }}</td>
+                <td>{{ task.category }}</td>
+                <td>
+                    <input type="checkbox" class="status-checkbox" {% if task.status == 'COMPLETED' %}checked{% endif %} data-task-id="{{ task.id }}">
+                </td>
+                <td>
+                    <button class="delete-btn" data-task-id="{{ task.id }}">Delete</button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        // Add task form submission
+        const taskForm = document.querySelector('#task-form');
+        taskForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const detailInput = document.querySelector('#detail-input');
+            const categoryInput = document.querySelector('#category-input');
+            const addTaskBtn = document.querySelector('#add-task-btn');
+
+            // Disable the Add Task button while submitting the form
+            addTaskBtn.disabled = true;
+
+            fetch('{% url "add_task" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value,
+            },
+            body: JSON.stringify({
+                detail: detailInput.value,
+                category: categoryInput.value,
+            }),
+            })
+            .then(response => response.json())
+            .then(data => {
+            console.log(data);
+            // Reset the form inputs and enable the Add Task button
+            detailInput.value = '';
+            categoryInput.value = '';
+            addTaskBtn.disabled = false;
+            // Refresh the task list
+            refreshTaskList();
+            })
+            .catch(error => {
+            console.error(error);
+            // Enable the Add Task button if there's an error
+            addTaskBtn.disabled = false;
+            });
+        });
+
+        // Update task status when checkbox is clicked
+        const statusCheckboxes = document.querySelectorAll('.status-checkbox');
+        statusCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+            const taskId = checkbox.dataset.taskId;
+            const newStatus = checkbox.checked ? 'COMPLETE' : 'INCOMPLETE';
+            
+
+            fetch('{% url "update_task" %}', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value,
+                },
+                body: JSON.stringify({
+                id: taskId,
+                status: newStatus,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Refresh the task list
+                refreshTaskList();
+            })
+       

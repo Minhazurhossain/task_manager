@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Task Manager</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <!-- Navbar -->
+        <nav>
+            <div class="navbar-left">
+            <img src=" " alt="Task Manager Logo">
+            </div>
+            <div class="navbar-right">
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#task-manager">Task Manager</a></li>
+                <li><a href="#home">Home</a></li>
+            </ul>
+            </div>
+        </nav>
+        <!-- Paragraph with Graphic -->
+        <section class="paragraph">
+        <div class="graphic">
+            <img src=" " alt="Task Manager Graphic">
+        </div>
+        <p>Task Manager is the ultimate productivity tool to help you stay organized and on top of your tasks.</p>
+        </section>
+
+        <!-- Login Form -->
+        <section class="login-form">
+            <form action="{% url 'task' %}" method="POST">
+            {% csrf_token %}
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <input type="button" value="Submit" onclick="submitForm()">
+    
+                <script>
+                    function submitForm() {
+                        document.querySelector("form").submit();
+                    }
+                </script>
+
+            <div class="register-link">
+                <p>Don't have an account? <a href="{% url 'user_register' %}" onclick="openRegistration()">Register here.</a></p>
+            </div>
+            
+           
+        </form>
+        </section>
+    </body>
+</html>
